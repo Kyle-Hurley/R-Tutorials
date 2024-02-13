@@ -43,8 +43,7 @@ generate_explosion <- function(n_fireworks = 2, n_rounds = 2) {
         speed = runif(n_particles, runif(1, 0.25, 0.5), runif(1, 5, 20)), # Speed of each particle
         time = time,
         colors = rep(firework_colors[sample(1:length(firework_colors), 1)], times = n_particles), # Color
-        size = rep(sample(c(0.05, 0.06, 0.065), 1), times = n_particles), # Random particle size
-        # alpha = ifelse(time < 0.1 * max(time), 1, decay_rate) # "Light" intensity over time
+        size = rep(sample(c(0.25, 0.5, 0.75, 1), 1), times = n_particles), # Random particle size
         alpha = ifelse(time < 0.1 * max(time), 1, 
                        ifelse(time == max(time), 0, decay_rate)) # "Light" intensity over time
       )
@@ -80,9 +79,14 @@ generate_explosion <- function(n_fireworks = 2, n_rounds = 2) {
     
     # Add time between rounds if needed
     if (n_rounds > 1) {
-      # round$time <- round$time + (max(round$time) + sample(20:50, 1))
-      round$time <- round$time + (r * sample((5*n_fireworks):(10*n_fireworks), 1))
-      rounds_list[[r]] <- round
+      
+      if (r != 1) {
+        round$time <- round$time + (max(rounds_list[[r-1]]$time) + sample(1:10, 1))
+        rounds_list[[r]] <- round
+      } else {
+        rounds_list[[r]] <- round
+      }
+      
     } else {
       rounds <- round
     }
@@ -102,6 +106,7 @@ generate_explosion <- function(n_fireworks = 2, n_rounds = 2) {
     geom_point(shape = 16, aes(color = colors, size = size, 
                                group = firework, alpha = alpha)) + 
     xlim(x_lims) + ylim(y_lims) + 
+    scale_size_area(max_size = 2) + 
     theme_void() + 
     theme(legend.position = "none", 
           plot.background = element_rect(fill = "black")) + 
@@ -113,8 +118,8 @@ generate_explosion <- function(n_fireworks = 2, n_rounds = 2) {
 
 
 # Create fireworks show!!
-n_fireworks <- 5
-n_rounds <- 3
+n_fireworks <- 10
+n_rounds <- 4
 p <- generate_explosion(n_fireworks = n_fireworks, n_rounds = n_rounds)
 
 # Animate
